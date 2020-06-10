@@ -3,6 +3,7 @@ from v02.Utils import *
 
 def header(n_mfcc):
     header = 'filename spectral_centroid spectral_bandwidth rolloff zero_crossing_rate rmse'
+    # header = 'filename'
     for i in range(1, n_mfcc + 1):
         header += f' mfcc{i}'
     return header.split()
@@ -17,13 +18,12 @@ def getAllFeatures(audio_files):
     return np.vstack(audios_feat)
 
 #directories of normal audios
-data_dir = "../audio/"
+data_dir = "../train/"
 audio_files = glob(data_dir + '*.wav')
 print(audio_files)
 
-
 # Save all the features to the csv file
-output = "featuresplayground100-v02.csv"
+output = "features-v02-02.csv"
 features = getAllFeatures(audio_files)
 toCsv(features, header=header(n_mfcc), path=output)
 
