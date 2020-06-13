@@ -2,7 +2,7 @@ from annoy import AnnoyIndex
 from v02.Utils import *
 
 # Read feature file
-df = pd.read_csv('./feature/features-v02-02.csv')
+df = pd.read_csv('./feature/features-final.csv')
 df.head()
 
 # Convert features from df to list of list features
@@ -26,7 +26,7 @@ for i in range(len(features)):
 
 # create index tree
 t.build(f)
-t.save('./indextree/features-minmax-v02-02.ann')
+t.save('./indextree/features-minmax-final.ann')
 
 print("DONE")
 

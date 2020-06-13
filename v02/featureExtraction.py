@@ -23,7 +23,7 @@ audio_files = glob(data_dir + '*.wav')
 print(audio_files)
 
 # Save all the features to the csv file
-output = "features-v02-02.csv"
+output = "features-final.csv"
 features = getAllFeatures(audio_files)
 toCsv(features, header=header(n_mfcc), path=output)
 

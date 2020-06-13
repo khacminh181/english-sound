@@ -3,7 +3,7 @@ from v02.Utils import *
 from collections import Counter
 import pandas as pd
 
-df = pd.read_csv('./feature/features-v02-02.csv')
+df = pd.read_csv('./feature/features-final.csv')
 # List file name
 words = df["filename"].tolist()
 
@@ -35,7 +35,7 @@ def printResult(audio, results):
 # load index tree
 f = len(df.columns) - 1
 u = AnnoyIndex(f, metric='euclidean')
-u.load('./indextree/features-minmax-v02-02.ann')
+u.load('./indextree/features-minmax-final.ann')
 
 # search
 # audio = "../audio/minimal--_gb_1.wav"
@@ -50,14 +50,12 @@ u.load('./indextree/features-minmax-v02-02.ann')
 # audio = "../test/international_en.wav"
 # audio = "../test/minimal_en(1).wav"
 # audio = "../test/ordinary_en(1).wav"
-# audio = "../test/pronunciation_en_swing (3).wav"
+audio = "../test/pronunciation_en_swing (3).wav"
 # audio = "../audio-test/ordinary--_us_1 (online-audio-converter.com).wav"
-audio = "../audio-test/book--_us_1 (online-audio-converter.com).wav"
+# audio = "../audio-test/book--_us_1 (online-audio-converter.com).wav"
 
 feat = get_audio_feature_vector(audio)
-print(feat)
 results = get_result(feat, words, 5)
-print(results)
 printResult(audio, results)
 
 
