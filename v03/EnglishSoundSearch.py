@@ -1,9 +1,10 @@
 from annoy import AnnoyIndex
-from v02.Utils import *
+from v03.Utils import *
 from collections import Counter
 import pandas as pd
+from v03.knn import *
 
-df = pd.read_csv('./feature/features-final-3.csv')
+df = pd.read_csv('./feature/features.csv')
 # List file name
 words = df["filename"].tolist()
 
