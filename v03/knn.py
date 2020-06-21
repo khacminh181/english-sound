@@ -1,4 +1,3 @@
-import numpy as np
 from v03.Utils import *
 from collections import Counter
 
@@ -9,8 +8,6 @@ def euclidian_distance(instance1, instance2):
 a = np.array([1, 2, 3])
 b = np.array([4, 5, 6])
 ect = euclidian_distance(a, b)
-
-
 
 def get_neighbors(training_set,
                   labels,

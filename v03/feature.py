@@ -1,19 +1,15 @@
 import numpy as np
-import librosa
-from scipy import signal
-import scipy
 
-def zero_crossing_rate(y):
+def zero_crossing_rate(y, frame_length=2048, hop_length=512, axis=-1):
     """
     Tính tần suất cắt trục hoành
-    Đầu vào là array các frame của file audio
-    :param audio_frames: np.ndarray [shape=(frame_length, t)] Input array
+    Đầu vào là array các frame của file audio    :param audio_frames: np.ndarray [shape=(frame_length, t)] Input array
     :return: np.ndarray [shape=(1, t)]
        Với t là số frame
     """
-    ypad = np.pad(y, int(2048 // 2), mode='edge')
+    ypad = np.pad(y, int(frame_length // 2), mode='edge')
 
-    audio_frames = frame(ypad, 2048, 512)
+    audio_frames = frame(ypad, frame_length, hop_length)
     frame_length = audio_frames.shape[0]
     audio_frames = audio_frames.T
     # Tạo 1 boolean array tương ứng khi signal > 0  (np.sign(frame) > 0)
@@ -21,7 +17,7 @@ def zero_crossing_rate(y):
     # Chia cho frame_length để lấy rate
     return np.array([(np.sum(np.diff(np.sign(f) > 0))) / frame_length for f in audio_frames]).reshape(1, -1)
 
-def energy(y):
+def energy(y, frame_length=2048, hop_length=512, axis=-1):
     """
     Tính năng lượng trung bình
     :param audio_frames: np.ndarray [shape=(frame_length, t)] Input array
@@ -29,22 +25,11 @@ def energy(y):
        Với t là số frame
     """
 
-    ypad = np.pad(y, int(2048 // 2), mode='edge')
+    ypad = np.pad(y, int(frame_length // 2), mode='edge')
     # (2048, t)
-    audio_frames = frame(ypad, 2048, 512)
+    audio_frames = frame(ypad, frame_length, hop_length)
     # E = x^2 / N
     return np.mean(np.abs(audio_frames)**2, axis=0, keepdims=True)
-
-def spectral_rolloff(audio_frames):
-    return None
-
-def spectral_bandwidth(audio_frames):
-    return None
-
-# def stft(x, fs, frame_size, hop):
-#     framesamp = int(frame_size * fs)
-#     hopsamp =
-#     return None
 
 def frame(x, frame_length=2048, hop_length=512, axis=-1):
     """
@@ -80,11 +65,3 @@ def frame(x, frame_length=2048, hop_length=512, axis=-1):
         shape = [n_frames, frame_length] + list(x.shape)[1:]
         strides = [hop_length * new_stride] + list(strides)
     return np.lib.stride_tricks.as_strided(x, shape=shape, strides=strides)
-
-def fft_frequencies(sr=22050, n_fft=2048):
-    return np.linspace(0,
-                       float(sr) / 2,
-                       int(1 + n_fft//2),
-                       endpoint=True)
-
-

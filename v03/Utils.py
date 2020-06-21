@@ -1,34 +1,15 @@
-import numpy as np
-import librosa
 import pandas as pd
 from v03.feature import *
 from glob import glob
+import librosa
 
-
-def normalize(vector):
-    return vector / np.linalg.norm(vector)
-
-# def normalize_minmax_matrix(matrix):
-#     for vector in matrix:
-#         max_value = max(vector)
-#         min_value = min(vector)
-#         for i in range(len(vector)):
-#             vector[i] = (vector[i] - min_value) / (max_value - min_value)
-#     return matrix
-# def normalize_minmax(vector):
-#     max_value = max(vector)
-#     min_value = min(vector)
-#     for i in range(len(vector)):
-#         vector[i] = (vector[i] - min_value) / (max_value - min_value)
-#     return vector
 def normalize_minmax_matrix(matrix):
     return [normalize_minmax(vector) for vector in matrix]
 
 def normalize_minmax(vector):
     max_value = np.max(vector)
     min_value = np.min(vector)
-    print('max: {}, min: {}'.format(max_value, min_value))
-    # return [(vector[i] - min_value) / (max_value - min_value) for i in range(len(vector))]
+    # print('max: {}, min: {}'.format(max_value, min_value))
     return np.array([(2 * (vector[i] - min_value) / (max_value - min_value)) - 1 for i in range(len(vector))])
 
 def get_feature_vector(y, sr, file = None):
@@ -42,78 +23,16 @@ def get_feature_vector(y, sr, file = None):
     # Get n_frame
     n_frame = zcr.shape[1]
 
-    # centroid = normalize_minmax(centroid)
-    # bandwidth = normalize_minmax(bandwidth)
-    # rolloff = normalize_minmax(rolloff)
-    # zcr = normalize_minmax(zcr)
-    # rms = normalize_minmax(rms)
-    # norm_vector = normalize_minmax(np.concatenate((centroid.T, bandwidth.T, rolloff.T,zcr.T, rms.T), axis=1))
+    centroid = normalize_minmax(centroid)
+    bandwidth = normalize_minmax(bandwidth)
+    rolloff = normalize_minmax(rolloff)
+    zcr = normalize_minmax(zcr)
+    rms = normalize_minmax(rms)
     norm_vector = np.concatenate((centroid, bandwidth, rolloff, zcr, rms), axis=-1)
-    print(norm_vector)
-    norm_vector = normalize_minmax(norm_vector)
+    # norm_vector = normalize_minmax(norm_vector)
     if file == None:
         return norm_vector
-        # return normalize_minmax_matrix(np.concatenate((centroid.T, bandwidth.T, rolloff.T,zcr.T, rms.T), axis=1))
-
-    # create array of name (1, frame)
-    # audio_name = np.full(bandwidth.shape, file)
-    # return np.concatenate((file, norm_vector))
     return n_frame, np.append([file], norm_vector)
-
-def get_feature_vector1(y, sr, file = None):
-    # (1, frame)
-    centroid = librosa.feature.spectral_centroid(y, sr)
-    bandwidth = librosa.feature.spectral_bandwidth(y, sr)
-    rolloff = librosa.feature.spectral_rolloff(y, sr)
-    zcr = zero_crossing_rate(y)
-    rms = energy(y)
-
-    # centroid = normalize_minmax(centroid)
-    # bandwidth = normalize_minmax(bandwidth)
-    # rolloff = normalize_minmax(rolloff)
-    # zcr = normalize_minmax(zcr)
-    # rms = normalize_minmax(rms)
-    # norm_vector = normalize_minmax_matrix(np.concatenate((centroid.T, bandwidth.T, rolloff.T,zcr.T, rms.T), axis=1))
-    norm_vector = np.concatenate((centroid.T, bandwidth.T, rolloff.T,zcr.T, rms.T), axis=1)
-    if file == None:
-        return normalize_minmax_matrix(norm_vector)
-        # return normalize_minmax_matrix(np.concatenate((centroid.T, bandwidth.T, rolloff.T,zcr.T, rms.T), axis=1))
-
-    # create array of name (1, frame)
-    audio_name = np.full(bandwidth.shape, file)
-    return np.concatenate((audio_name.T, norm_vector), axis=1)
-
-def get_feature_vector2(y, sr, file = None):
-    # (1, frame)
-    centroid = librosa.feature.spectral_centroid(y, sr)
-    bandwidth = librosa.feature.spectral_bandwidth(y, sr)
-    rolloff = librosa.feature.spectral_rolloff(y, sr)
-    zcr = zero_crossing_rate(y)
-    rms = energy(y)
-
-    # centroid = normalize_minmax(centroid)
-    # bandwidth = normalize_minmax(bandwidth)
-    # rolloff = normalize_minmax(rolloff)
-    # zcr = normalize_minmax(zcr)
-    # rms = normalize_minmax(rms)
-
-    # centroid = np.mean(centroid)
-    # bandwidth = np.mean(bandwidth)
-    # rolloff = np.mean(rolloff)
-    # zcr = np.mean(zcr)
-    # rms = np.mean(rms)
-    # norm_vector = normalize_minmax_matrix(np.concatenate((centroid.T, bandwidth.T, rolloff.T,zcr.T, rms.T), axis=1))
-    norm_vector = np.array([centroid, bandwidth, rolloff,zcr, rms])
-    norm_vector = normalize_minmax(norm_vector)
-    # norm_vector = np.concatenate((centroid.T, bandwidth.T, rolloff.T,zcr.T, rms.T), axis=1)
-    if file == None:
-        return norm_vector
-        # return normalize_minmax_matrix(np.concatenate((centroid.T, bandwidth.T, rolloff.T,zcr.T, rms.T), axis=1))
-
-    # create array of name (1, frame)
-    audio_name = np.full(bandwidth.shape, file)
-    return np.concatenate((audio_name.T, norm_vector), axis=1)
-    # return np.append([file], norm_vector)
 
 def loadAudio(file):
     y_max = 20480
@@ -122,7 +41,6 @@ def loadAudio(file):
     if y.shape[0] < y_max:
         y = np.pad(y, (0, y_max - len(y) % y_max), 'constant')
 
-    # yt, index = librosa.effects.trim(y)
     return y, sr
 
 def toCsv(a, header, path):

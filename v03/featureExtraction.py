@@ -1,5 +1,4 @@
 from v03.Utils import *
-from v03.feature import *
 
 def header(n_frame):
     header = 'filename'
@@ -28,7 +27,7 @@ def getAllFeatures(audio_files):
 audio_files, y_max, duration_max = initalize()
 
 # Save all the features to the csv file
-output = "features5.csv"
+output = "features7.csv"
 n_frame, features = getAllFeatures(audio_files)
 toCsv(features, header=header(n_frame), path=output)
 

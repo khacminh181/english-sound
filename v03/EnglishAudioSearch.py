@@ -1,8 +1,6 @@
-from v03.Utils import *
-import pandas as pd
 from v03.knn import *
 
-df = pd.read_csv('./features/features5.csv')
+df = pd.read_csv('./features/features6.csv')
 df.head()
 
 df = df[(df != 0).all(1)]
@@ -27,7 +25,6 @@ def get_result(feat, words, searchK):
     results = []
     for vector_feat in feat:
         result = get_neighbors(features, words, vector_feat, searchK)
-        # result = [getAudioName(k[2]) for k in result]
         result = getAudioName(vote(result))
         results.append(result)
     return np.array(results).flatten()
@@ -48,28 +45,25 @@ def printResult(audio, results):
 # audio = "../audio/minimal--_gb_1.wav"
 # audio = "../audio/book.wav"
 # audio = "../test/ordinary_en(1).wav"
-# audio = "../test/agreement_en(1).wav"
 # audio = "../test/pronunciation_en_swing (3).wav"
 # audio = "../audio-test/ordinary--_us_1 (online-audio-converter.com).wav"
 # audio = "../test/brick(10)_F.wav"
-# audio = "../test/agreement_uk_M.wav"
 
+# audio = "../test/agreement_en(1).wav"
+# audio = "../test/agreement_uk_M.wav"
 # audio = "../test/international_en.wav"
 # audio = "../test/international_F .wav"
 # audio = "../test/kid_us_M(3).wav"
 # audio = "../audio-test/book--_us_1 (online-audio-converter.com).wav"
-# audio = "../test/book_en(3).wav"
+audio = "../test/book_en(3).wav"
 # audio = "../test/circle_en(1).wav"
-audio = "../test/minimal_en(1).wav"
+# audio = "../test/minimal_en(1).wav"
 # audio = "../audio-test/book--_us_1 (online-audio-converter.com).wav"
 
 feat = get_audio_feature_vector(audio)
-print(feat)
 results = get_neighbors(features, words, feat, 10)
-r = [i[2] for i in results]
-# print(results)
+r = [getAudioName(i[2]) for i in results]
 print(vote(results))
-# r = get_result(feat, words, 5)
-# printResult(audio, r)
+
 
 
