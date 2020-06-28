@@ -27,7 +27,7 @@ def getAllFeatures(audio_files):
 audio_files, y_max, duration_max = initalize()
 
 # Save all the features to the csv file
-output = "features7.csv"
+output = "features8.csv"
 n_frame, features = getAllFeatures(audio_files)
 toCsv(features, header=header(n_frame), path=output)
 

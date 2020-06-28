@@ -1,6 +1,6 @@
 from v03.Utils import *
 from v03.feature import *
-from IPython.display import Audio
+import librosa
 # y, sr = loadAudio("../audio/book.wav")
 # Audio(y, rate=sr)
 #
@@ -31,20 +31,32 @@ from IPython.display import Audio
 #
 # freq = librosa.core.fft_frequencies(sr=sr, n_fft=2048)
 
+y_before, sr = librosa.load("../audio/book.wav")
 y, sr = loadAudio("../audio/book.wav")
+duration = librosa.get_duration(y, sr)
 ypad = np.pad(y, int(2048 // 2), mode='edge')
-frame_length=2048
-hop_length=512
-n_frames = 1 + (ypad.shape[-1] - frame_length) // hop_length
-# số bytes để nhảy sang điểm mới
-# Giả dụ có matrix (3,3), với axis=1, đi từ điểm (0,0)->(0,1) mất 4 bytes, Với axis=0, đi từ điểm (0,0)->(1,0) sẽ phải đi (0,0)->(0,1)->(0,2)->(1,0), vì vậy mất 4*3 = 12 bytes.
-# Vì vậy vơi matrix (3,3) strides là (12, 4)
-# strides (shape[1] * itemsize, itemsize)
-strides1 = np.asarray(ypad.strides)
-# itemsize - length của 1 phần tử trong array
-new_stride = np.prod(strides1[strides1 > 0] // ypad.itemsize) * ypad.itemsize
-shape = list(ypad.shape)[:-1] + [frame_length, n_frames]
-print(list(ypad.shape)[:-1])
-strides = list(strides1) + [hop_length * new_stride]
-print([hop_length * new_stride])
-frame2 = frame(ypad, 2048, 512)
+frame = frame(ypad)
+#
+# # features
+# # speech signal
+# zcr = zero_crossing_rate(y)
+# e = energy(y)
+#
+# # spectrogram
+# centroid = librosa.feature.spectral_centroid(y, sr)
+# bandwidth = librosa.feature.spectral_bandwidth(y, sr)
+# rolloff = librosa.feature.spectral_rolloff(y,sr)
+
+stft1 = stft(y)
+stft2 = librosa.stft(y)
+spec, n = spectrogram(y)
+spec1 = np.abs(stft1 ** 1)
+freq = librosa.core.time_frequency.fft_frequencies(sr=sr, n_fft=2048)
+freq = freq.reshape((-1, 1))
+a = spectral_centroid(y, sr)
+b = librosa.feature.spectral_centroid(y, sr)
+c = spectral_bandwidth(y, sr)
+d = librosa.feature.spectral_bandwidth(y, sr)
+e = spectral_rolloff(y, sr)
+f = librosa.feature.spectral_rolloff(y, sr)
+

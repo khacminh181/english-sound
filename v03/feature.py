@@ -1,9 +1,11 @@
 import numpy as np
+import librosa
 
 def zero_crossing_rate(y, frame_length=2048, hop_length=512, axis=-1):
     """
     Tính tần suất cắt trục hoành
-    Đầu vào là array các frame của file audio    :param audio_frames: np.ndarray [shape=(frame_length, t)] Input array
+    Đầu vào là array các frame của file audio
+    :param audio_frames: np.ndarray [shape=(frame_length, t)] Input array
     :return: np.ndarray [shape=(1, t)]
        Với t là số frame
     """
@@ -59,9 +61,65 @@ def frame(x, frame_length=2048, hop_length=512, axis=-1):
     # itemsize - length của 1 phần tử trong array
     new_stride = np.prod(strides[strides > 0] // x.itemsize) * x.itemsize
     if axis == -1:
+        # [2048, 41]
         shape = list(x.shape)[:-1] + [frame_length, n_frames]
+        # [4, 2048]
         strides = list(strides) + [hop_length * new_stride]
     elif axis == 0:
         shape = [n_frames, frame_length] + list(x.shape)[1:]
         strides = [hop_length * new_stride] + list(strides)
     return np.lib.stride_tricks.as_strided(x, shape=shape, strides=strides)
+
+def stft(y, n_fft=2048, hop_length=512):
+    win_length = n_fft
+    y = np.pad(y, int(n_fft // 2), mode='reflect')
+    y = frame(y, hop_length=hop_length)
+    w = np.hanning(win_length)
+    # X = np.array([np.fft.fft(w*y[i:i+n_fft])
+    #                  for i in range(0, len(y)-n_fft, hop_length)])
+    X = np.array([np.fft.fft(w*i)
+                     for i in y.T])
+
+    return X[:, 0:int(1 + 2048 // 2)].T
+
+def spectrogram(y, n_fft=2048, hop_length=512, power=1):
+    S = np.abs(stft(y, n_fft, hop_length) ** power)
+    return S, n_fft
+
+def spectral_centroid(y=None, sr=22050, n_fft=2048, hop_length=512):
+    #  S (1025, 41)
+    S, n_fft = spectrogram(y, n_fft, hop_length)
+    freq = librosa.core.time_frequency.fft_frequencies(sr=sr, n_fft=n_fft)
+    # (1025, 1)
+    freq = freq.reshape((-1, 1))
+
+    return np.sum(freq * librosa.util.utils.normalize(S, norm=1, axis=0),
+           axis=0, keepdims=True)
+
+def spectral_bandwidth(y=None, sr=22050, n_fft=2048, hop_length=512, p=2):
+    # The spectral bandwidth at frame t is computed by:
+    # (sum_k S[k, t] * (freq[k, t] - centroid[t]) ** p) ** (1 / p)
+    #  S (1025, 41)
+    S, n_fft = spectrogram(y, n_fft, hop_length)
+    centroid = spectral_centroid(y=y, sr=sr)
+    # (1025, 41)
+    freq = librosa.core.time_frequency.fft_frequencies(sr=sr, n_fft=n_fft)
+
+    # deviation = np.abs(freq - centroid[0])
+    # (1025, 41)
+    deviation = np.abs(np.subtract.outer(freq, centroid[0]))
+    S = librosa.util.utils.normalize(S, norm=1, axis=0)
+
+    return np.sum(S * deviation ** p, axis=0, keepdims=True) ** (1. / p)
+
+def spectral_rolloff(y=None, sr=22050, S=None, n_fft=2048, hop_length=512, roll_percent=0.85):
+    #  S (1025, 41)
+    S, n_fft = spectrogram(y, n_fft, hop_length)
+    centroid = spectral_centroid(y=y, sr=sr)
+    # (1025, 41)
+    freq = librosa.core.time_frequency.fft_frequencies(sr=sr, n_fft=n_fft)
+    freq = freq.reshape((-1, 1))
+    total_energy = np.cumsum(S, axis=0)
+    threshold = roll_percent * total_energy[-1]
+    ind = np.where(total_energy < threshold, np.nan, 1)
+    return np.nanmin(ind * freq, axis=0, keepdims=True)

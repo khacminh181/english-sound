@@ -14,9 +14,12 @@ def normalize_minmax(vector):
 
 def get_feature_vector(y, sr, file = None):
     # (1, frame)
-    centroid = librosa.feature.spectral_centroid(y, sr)
-    bandwidth = librosa.feature.spectral_bandwidth(y, sr)
-    rolloff = librosa.feature.spectral_rolloff(y, sr)
+    # centroid = librosa.feature.spectral_centroid(y, sr)
+    # bandwidth = librosa.feature.spectral_bandwidth(y, sr)
+    # rolloff = librosa.feature.spectral_rolloff(y, sr)
+    centroid = spectral_centroid(y, sr)
+    bandwidth = spectral_bandwidth(y, sr)
+    rolloff = spectral_rolloff(y, sr)
     zcr = zero_crossing_rate(y)
     rms = energy(y)
 
@@ -29,7 +32,6 @@ def get_feature_vector(y, sr, file = None):
     zcr = normalize_minmax(zcr)
     rms = normalize_minmax(rms)
     norm_vector = np.concatenate((centroid, bandwidth, rolloff, zcr, rms), axis=-1)
-    # norm_vector = normalize_minmax(norm_vector)
     if file == None:
         return norm_vector
     return n_frame, np.append([file], norm_vector)

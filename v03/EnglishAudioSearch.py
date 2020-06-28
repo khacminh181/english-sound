@@ -1,6 +1,7 @@
 from v03.knn import *
 
-df = pd.read_csv('./features/features6.csv')
+# df = pd.read_csv('./features/features6.csv')
+df = pd.read_csv('./features/features8.csv')
 df.head()
 
 df = df[(df != 0).all(1)]

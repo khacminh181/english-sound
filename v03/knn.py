@@ -7,7 +7,10 @@ def euclidian_distance(instance1, instance2):
 
 a = np.array([1, 2, 3])
 b = np.array([4, 5, 6])
+y1, sr1 = loadAudio('../train/agreement_1.wav')
+y2, sr2 = loadAudio('../train/agreement_en(4).wav')
 ect = euclidian_distance(a, b)
+ect2 = euclidian_distance(get_feature_vector(y1, sr1), get_feature_vector(y2, sr2))
 
 def get_neighbors(training_set,
                   labels,
